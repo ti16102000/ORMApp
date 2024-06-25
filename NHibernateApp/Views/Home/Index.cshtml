@@ -8,8 +8,56 @@
 </div>
 
 <div class="container-fluid">
+    <div class="row mt-3 mb-5">
+        <form class="row d-none" id="form-order">
+            <div class="col-md-6">
+                <h4>Add Order</h4>
+                <div class="form-group mt-3">
+                    <input type="text" class="form-control" id="orderNumber" placeholder="Enter order number">
+                </div>
+                <div class="form-group mt-3">
+                    <button type="button" class="btn btn-secondary float-end" onclick="saveOrder()">Create</button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Order Items</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-primary float-end" onclick="addRowItem()">Add</button>
+                    </div>
+                </div>
+                <div class="mt-2" id="group-items">
+                    <div class="row mb-3 row-item d-none">
+                        <div class="form-group col-md-5">
+                            <input type="text" class="form-control" attr-name="productSku" value="" placeholder="Product Sku">
+                            <input type="text" attr-name="id" value="" hidden>
+                            <input type="text" attr-name="orderId" value="" hidden>
+                        </div>
+                        <div class="form-group col-md-5">
+                            <input type="text" class="form-control" attr-name="itemPrice" onkeyup="setItemPrice(this)" placeholder="Price">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <button type="button" class="btn btn-danger" onclick="removeRowItem(this)">Remove</button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
     <div class="row">
-        <div class="col-md-6"></div>
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-primary" onclick="addNewOrder()">Create New Order</button>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-info float-end">Remove Orders/Items</button>
+                </div>
+            </div>
+        </div>
         <div class="col-md-6">
             <div class="input-group mb-3">
                 <input type="text" id="search-order" class="form-control" placeholder="Search Order Number" aria-label="Search Order Number" aria-describedby="basic-addon2">
@@ -40,13 +88,13 @@
                             </td>
                             <td class="order-number" onclick="show_items(this,'@item.Id')">@item.OrderNumber</td>
                             <td>
-                                <a href="#">Edit</a> | <a href="#">Delete</a> <br/>
+                                <a href="#">Edit</a> | <a href="#">Delete</a> <br />
                                 <a href="javascript:;" onclick="show_items(this,'@item.Id')">Show items</a>
 
                             </td>
                         </tr>
                     }
-                   
+
                 </tbody>
             </table>
         </div>
@@ -63,7 +111,6 @@
                     </tr>
                 </thead>
                 <tbody id="bodyOrderItems">
-                    
                 </tbody>
             </table>
         </div>
@@ -72,7 +119,42 @@
 
 @section scripts {
     <script type="text/javascript">
-        function search(){
+        var templateItem = $("#form-order #group-items").html().replace("d-none", "");
+        $("#form-order #group-items").html("")
+
+        function addNewOrder() {
+            $("#form-order").removeClass("d-none");
+        }
+        function addRowItem() {
+            $("#form-order #group-items").append(templateItem);
+        }
+        function removeRowItem(obj) {
+            $(obj).parents(".row-item").remove();
+        }
+        function setItemPrice(obj) {
+            $(obj).val(function (index, value) {
+                return value.replace(/(?!\.)\D/g, "")
+                    .replace(/(?<=\..*)\./g, "")
+                    .replace(/(?<=\.\d\d).*/g, "")
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            });
+        }
+        function saveOrder(){
+            var orderNumberVal = $("#orderNumber").val().trim();
+            if (orderNumberVal === "") {
+                alert("Please enter order number! This is a required field.");
+                return;
+            }
+            var items = [];
+            if ($("#form-order #group-items>div").length > 0) {
+                $("#form-order #group-items>div").each(function () {
+                    var productId = $(this).attr('id');
+                    
+                    // items.push(clonedobj);
+                });
+            }
+        }
+        function search() {
             var value = $("#search-order").val();
             $("#orderTable .order-number").removeClass("text-danger")
             $.ajax({
@@ -84,7 +166,7 @@
                 $('#bodyOrderItems').html(result);
             });
         }
-        function show_items(obj,orderId) {
+        function show_items(obj, orderId) {
             var currentClassObj = $(obj).parents("tr").children(".order-number").attr("class");
             if (currentClassObj.indexOf("text-danger") != -1) {
                 $(obj).parents("tr").children(".order-number").removeClass("text-danger");
@@ -100,10 +182,10 @@
                     $('#bodyOrderItems tr').remove();
                     $('#bodyOrderItems').html(result);
                 });
-            }            
+            }
         }
         $(function () {
-            
+
         });
     </script>
 }
