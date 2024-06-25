@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using NHibernateApp.Models;
+using NHibernateApp.Repositories;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Reflection;
 
 namespace NHibernateApp.Controllers
@@ -8,15 +10,29 @@ namespace NHibernateApp.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IOrderItemRepository _orderItemRepository;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger
+            , IOrderRepository orderRepository
+            , IOrderItemRepository orderItemRepository)
         {
             _logger = logger;
+            _orderRepository = orderRepository;
+            _orderItemRepository = orderItemRepository;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var orders = await _orderRepository.GetOrdersAsync();
+            return View(orders);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetOrderItems(Guid orderId, string orderNumber)
+        {
+            var orderItems = await _orderItemRepository.GetOrderItemsAsync(orderId, orderNumber);
+            return PartialView("PartialOrderItems", orderItems);
         }
 
         public IActionResult Privacy()

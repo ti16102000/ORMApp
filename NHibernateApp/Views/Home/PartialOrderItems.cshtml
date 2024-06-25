@@ -1,0 +1,17 @@
+﻿@model List<NHibernateApp.Models.OrderItem>
+
+@if(Model != null && Model.Any()){
+    foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                <input type="checkbox" name="name" value="" />
+            </td>
+            <td>@item.ProductSku</td>
+            <td>@item.ItemPrice</td>
+            <td>
+                <a href="#">Edit</a> | <a href="#">Delete</a>
+            </td>
+        </tr>
+    }
+}

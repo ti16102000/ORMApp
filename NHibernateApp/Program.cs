@@ -1,3 +1,5 @@
+using NHibernateApp.Repositories;
+
 namespace NHibernateApp
 {
     public class Program
@@ -8,6 +10,8 @@ namespace NHibernateApp
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+            builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
 
             var app = builder.Build();
 

@@ -7,5 +7,10 @@ assembly="NHibernateApp" namespace="NHibernateApp.Models">
 			<generator class="guid" />
 		</id>
 		<property name="OrderNumber" not-null="true"/>
+
+		<!--<set name = "OrderItems" table = "TrainingOrderItem" cascade="all-delete-orphan">
+			<key column = "Order_ID_FK"/>
+			<one-to-many class = "OrderItem"/>
+		</set>-->	
 	</class>
 </hibernate-mapping>

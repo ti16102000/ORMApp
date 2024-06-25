@@ -1,8 +1,109 @@
-﻿@{
+﻿@model List<NHibernateApp.Models.Order>
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6"></div>
+        <div class="col-md-6">
+            <div class="input-group mb-3">
+                <input type="text" id="search-order" class="form-control" placeholder="Search Order Number" aria-label="Search Order Number" aria-describedby="basic-addon2">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" onclick="search()">Search</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <table class="table" id="orderTable">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" name="name" value="" />
+                        </th>
+                        <th>Order Number</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="name" value="" />
+                            </td>
+                            <td class="order-number" onclick="show_items(this,'@item.Id')">@item.OrderNumber</td>
+                            <td>
+                                <a href="#">Edit</a> | <a href="#">Delete</a> <br/>
+                                <a href="javascript:;" onclick="show_items(this,'@item.Id')">Show items</a>
+
+                            </td>
+                        </tr>
+                    }
+                   
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" name="name" value="" />
+                        </th>
+                        <th>Product Sku</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="bodyOrderItems">
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        function search(){
+            var value = $("#search-order").val();
+            $("#orderTable .order-number").removeClass("text-danger")
+            $.ajax({
+                url: '@Url.Action("GetOrderItems", "Home")?orderNumber=' + value,
+                type: 'GET',
+                cache: false,
+            }).done(function (result) {
+                $('#bodyOrderItems tr').remove();
+                $('#bodyOrderItems').html(result);
+            });
+        }
+        function show_items(obj,orderId) {
+            var currentClassObj = $(obj).parents("tr").children(".order-number").attr("class");
+            if (currentClassObj.indexOf("text-danger") != -1) {
+                $(obj).parents("tr").children(".order-number").removeClass("text-danger");
+                $('#bodyOrderItems tr').remove();
+            } else {
+                $("#orderTable .order-number").removeClass("text-danger")
+                $(obj).parents("tr").children(".order-number").addClass("text-danger");
+                $.ajax({
+                    url: '@Url.Action("GetOrderItems", "Home")?orderId=' + orderId,
+                    type: 'GET',
+                    cache: false,
+                }).done(function (result) {
+                    $('#bodyOrderItems tr').remove();
+                    $('#bodyOrderItems').html(result);
+                });
+            }            
+        }
+        $(function () {
+            
+        });
+    </script>
+}

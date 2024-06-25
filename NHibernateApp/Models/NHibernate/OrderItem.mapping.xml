@@ -7,7 +7,7 @@ assembly="NHibernateApp" namespace="NHibernateApp.Models">
 			<generator class="guid" />
 		</id>
 		<property name="OrderId" column="Order_ID_FK" not-null="true"/>
-		<property name="ProductSku" column="ProductSku" not-null="true"/>
-		<property name="ItemPrice" column="ItemPrice"/>
+		<property name="ProductSku" not-null="true"/>
+		<property name="ItemPrice"/>
 	</class>
 </hibernate-mapping>
