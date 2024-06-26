@@ -9,7 +9,7 @@ assembly="NHibernateApp" namespace="NHibernateApp.Models">
 		<property name="OrderNumber" not-null="true"/>
 
 		<set name ="OrderItems" table ="TrainingOrderItem" inverse="true" cascade="all-delete-orphan">
-			<key column = "Order_ID_FK"/>
+			<key column = "Order_ID_FK" not-null="true"/>
 			<one-to-many class = "OrderItem"/>
 		</set>	
 	</class>
