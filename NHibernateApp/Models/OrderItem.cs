@@ -6,5 +6,7 @@
         public virtual Guid OrderId { get; set; }
         public virtual string ProductSku { get; set; }
         public virtual decimal? ItemPrice { get; set; }
+        public virtual Order Order { get; set; }
+
     }
 }

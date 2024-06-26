@@ -6,8 +6,10 @@ assembly="NHibernateApp" namespace="NHibernateApp.Models">
 		<id name="Id" column="Id" type="guid">
 			<generator class="guid" />
 		</id>
-		<property name="OrderId" column="Order_ID_FK" not-null="true"/>
+		<property name="OrderId" column="Order_ID_FK" not-null="true" insert="false" update="false"/>
 		<property name="ProductSku" not-null="true"/>
 		<property name="ItemPrice"/>
+
+		<many-to-one name ="Order" class ="Order" column ="Order_ID_FK" not-null="true" insert="false" update="false" cascade="save-update"></many-to-one>
 	</class>
 </hibernate-mapping>

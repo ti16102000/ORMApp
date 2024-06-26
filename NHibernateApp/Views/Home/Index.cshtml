@@ -8,9 +8,74 @@
 </div>
 
 <div class="container-fluid">
+    <div class="row mt-3 mb-5">
+        <form class="row d-none" id="form-order">
+            <div class="col-md-6">
+                <h4 id="title-form-order">Add Order</h4>
+                <div class="form-group mt-3">
+                    <input type="text" class="form-control" id="orderNumber" placeholder="Enter order number">
+                    <input type="text" class="d-none" attr-name="isUpdate" value="">
+                    <input type="text" class="d-none" attr-name="orderId" value="">
+                </div>
+                <div class="form-group mt-3">
+                    <button type="button" class="btn btn-secondary float-end" onclick="saveOrder()" id="btnSave">Create</button>
+                    <button type="button" class="btn btn-danger float-end" onclick="cancel('#form-order')" id="btnSave" style="margin-right:20px;">Cancel</button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Order Items</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-primary float-end" onclick="addRowItem()">Add</button>
+                    </div>
+                </div>
+                <div class="mt-2" id="group-items">
+                    <div class="row mb-3 row-item d-none">
+                        <div class="form-group col-md-5">
+                            <input type="text" class="form-control" attr-name="productSku" value="" placeholder="Product Sku">
+                            <input type="text" attr-name="id" value="" hidden>
+                        </div>
+                        <div class="form-group col-md-5">
+                            <input type="text" class="form-control" attr-name="itemPrice" onkeyup="setItemPrice(this)" placeholder="Price">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <button type="button" class="btn btn-danger" onclick="removeRowItem(this)">Remove</button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
     <div class="row">
-        <div class="col-md-6"></div>
         <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-primary" onclick="addNewOrder()">Create New Order</button>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-info float-end" onclick="removeItems()">Remove Orders/Items</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row mb-3 d-none" id="formUpdateItem">
+                <div class="form-group col-md-6">
+                    <input type="text" class="form-control" attr-name="productSku" value="" placeholder="Product Sku">
+                    <input type="text" attr-name="id" value="" hidden>
+                    <input type="text" attr-name="orderId" value="" hidden>
+                </div>
+                <div class="form-group col-md-6">
+                    <input type="text" class="form-control" attr-name="itemPrice" onkeyup="setItemPrice(this)" placeholder="Price">
+                </div>
+                <div class="form-group mt-3">
+                    <button type="button" class="btn btn-secondary float-end" onclick="updateItem()">Update</button>
+                    <button type="button" class="btn btn-danger float-end" onclick="cancel('#formUpdateItem')" id="btnSave" style="margin-right:20px;">Cancel</button>
+                </div>
+
+            </div>
             <div class="input-group mb-3">
                 <input type="text" id="search-order" class="form-control" placeholder="Search Order Number" aria-label="Search Order Number" aria-describedby="basic-addon2">
                 <div class="input-group-append">
@@ -25,7 +90,7 @@
                 <thead>
                     <tr>
                         <th>
-                            <input type="checkbox" name="name" value="" />
+                            <input type="checkbox" class="checkAllItem" onclick="checkClickCheckboxItem('orderTable', true)" />
                         </th>
                         <th>Order Number</th>
                         <th>Actions</th>
@@ -36,26 +101,26 @@
                     {
                         <tr>
                             <td>
-                                <input type="checkbox" name="name" value="" />
+                                <input type="checkbox" class="checkItem" data-id="@item.Id" data-orderNumber="@item.OrderNumber.ToLower()" onclick="checkClickCheckboxItem('orderTable', false)" />
                             </td>
-                            <td class="order-number" onclick="show_items(this,'@item.Id')">@item.OrderNumber</td>
+                            <td class="order-number" onclick="show_items(this,'@item.Id')" data-orderId="@item.Id" data-orderNumber="@item.OrderNumber">@item.OrderNumber (@item.OrderItems.Count())</td>
                             <td>
-                                <a href="#">Edit</a> | <a href="#">Delete</a> <br/>
+                                <a href="javascript:;" onclick="editOrder('@item.Id','@item.OrderNumber')">Edit</a> |
                                 <a href="javascript:;" onclick="show_items(this,'@item.Id')">Show items</a>
 
                             </td>
                         </tr>
                     }
-                   
+
                 </tbody>
             </table>
         </div>
         <div class="col-md-6">
-            <table class="table">
+            <table class="table" id="orderItemTable">
                 <thead>
                     <tr>
                         <th>
-                            <input type="checkbox" name="name" value="" />
+                            <input type="checkbox" class="checkAllItem" onclick="checkClickCheckboxItem('orderItemTable', true)" />
                         </th>
                         <th>Product Sku</th>
                         <th>Price</th>
@@ -63,7 +128,6 @@
                     </tr>
                 </thead>
                 <tbody id="bodyOrderItems">
-                    
                 </tbody>
             </table>
         </div>
@@ -72,7 +136,154 @@
 
 @section scripts {
     <script type="text/javascript">
-        function search(){
+        var form = $("#form-order");
+        var templateItem = $("#form-order #group-items").html().replace("d-none", "");
+        clearGroupItemsForm();
+
+        function clearGroupItemsForm() {
+            $("#form-order #group-items").html("");
+        }
+        function cancel(idForm) { 
+            $(idForm).addClass("d-none")
+        }
+        function addNewOrder() {            
+            $(form).removeClass("d-none");
+            $("#title-form-order").html("Add Order")
+            $("#btnSave").html("Create");
+            $('input[attr-name="isUpdate"]').val("false");
+            $('input[attr-name="orderId"]').val("");
+            $("#orderNumber").val("");
+            clearGroupItemsForm();
+        }
+        function addRowItem() {
+            $("#form-order #group-items").append(templateItem);
+        }
+        function removeRowItem(obj) {
+            $(obj).parents(".row-item").remove();
+        }
+        function setItemPrice(obj) {
+            $(obj).val(function (index, value) {
+                return value.replace(/(?!\.)\D/g, "")
+                    .replace(/(?<=\..*)\./g, "")
+                    .replace(/(?<=\.\d\d).*/g, "")
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            });
+        }
+        function editOrder(orderId, orderNumber) {
+            $(form).removeClass("d-none");
+            $("#title-form-order").html("Update Order")
+            $("#btnSave").html("Update");
+            $('input[attr-name="isUpdate"]').val("true");
+            $('input[attr-name="orderId"]').val(orderId);
+            $("#orderNumber").val(orderNumber);
+            $.ajax({
+                url: '@Url.Action("GetOrderItemsForm", "Home")?orderId=' + orderId,
+                type: 'GET',
+                cache: false,
+            }).done(function (result) {
+                clearGroupItemsForm();
+                $('#group-items').html(result);
+            });
+        }
+        function removeItems(){
+            if ($("input.checkItem:checked").length === 0){
+                alert("Please choose item to remove!");
+                return;
+            }
+            var guidIds = [];
+            var idTable = "orderTable"
+            if ($("#orderItemTable .checkItem:checked").length > 0) {
+                idTable = "orderItemTable"
+            }
+            $("#"+ idTable + " .checkItem:checked").each(function () {
+                var id = $(this).attr("data-id");
+                if (id !== "") {
+                    guidIds.push(id);
+                }
+            });
+            var isDeleteOrder = idTable === "orderTable";
+            $.ajax({
+                url: 'api/Home/DeleteOrdersOrItems',
+                type: 'POST',
+                cache: false,
+                data: { guidIds: guidIds, isDeleteOrder: isDeleteOrder }
+            }).done(function (result) {
+                if (result.success) {
+                    alert("Remove Successfully!");
+                    if (idTable === "orderItemTable") {
+                        var orderNumber = $("#orderTable .text-danger").attr("data-ordernumber");
+                        sessionStorage.setItem('orderNumberSaved', orderNumber);
+                    }                    
+                    location.reload();
+                } else {
+                    alert(result.message);
+                }
+            });
+        }
+        function checkClickCheckboxItem(table, isCheckAll) {
+            if (table === 'orderTable') {
+                if ($("#orderItemTable input[type='checkbox']:checked").length > 0) {
+                    $("#orderTable input[type='checkbox']").prop('checked', false);
+                    return;
+                }
+            }else{
+                if ($("#orderTable input[type='checkbox']:checked").length > 0) {
+                    $("#orderItemTable input[type='checkbox']").prop('checked', false);
+                    return;
+                }
+            }
+            if (isCheckAll){
+                var valueChecked = $("#" + table + " .checkAllItem").is(":checked");
+                $("#" + table + " input[type='checkbox']").prop('checked', valueChecked);
+            }
+        }
+        function saveOrder(){
+            var orderNumberVal = $("#orderNumber").val().trim();
+            if (orderNumberVal === "") {
+                alert("Please enter order number! This is a required field.");
+                return;
+            }
+            var isUpdate = $('input[attr-name="isUpdate"]').val();
+            var orderId = $('input[attr-name="orderId"]').val();
+            var items = [];
+            if ($("#form-order #group-items>div").length > 0) {
+                $("#form-order #group-items>div").each(function () {
+                    var productSku = $(this).find('input[attr-name="productSku"]').val().trim();
+                    if (productSku !== ""){
+                        var price = $(this).find('input[attr-name="itemPrice"]').val().trim();
+                        var obj = {
+                            id: $(this).find('input[attr-name="id"]').val(),
+                            orderId: orderId,
+                            productSku: productSku,
+                            itemPrice: price.replace(",","")
+                        }
+                        items.push(obj);
+                    }
+                    
+                });
+            }
+            var order = {
+                Id: orderId,
+                OrderNumber: orderNumberVal,
+                OrderItems: items
+            };
+            console.log(order)
+            $.ajax({
+                url: 'api/Home/AddOrUpdateOrder',
+                type: 'POST',
+                cache: false,
+                data: { order: order, isUpdate: isUpdate }
+            }).done(function (result) {
+                if (result.success) {
+                    alert("Successfully!");
+                    sessionStorage.setItem('orderNumberSaved', orderNumberVal);
+                    location.reload();
+                } else {
+                    alert(result.message);
+                }
+            });
+        }        
+        function search() {
             var value = $("#search-order").val();
             $("#orderTable .order-number").removeClass("text-danger")
             $.ajax({
@@ -82,9 +293,12 @@
             }).done(function (result) {
                 $('#bodyOrderItems tr').remove();
                 $('#bodyOrderItems').html(result);
+                if ($('#bodyOrderItems tr').length > 0){
+                    $('#orderTable tbody tr td[data-ordernumber="' + value.toLowerCase() + '"]').addClass("text-danger")
+                }
             });
         }
-        function show_items(obj,orderId) {
+        function show_items(obj, orderId) {
             var currentClassObj = $(obj).parents("tr").children(".order-number").attr("class");
             if (currentClassObj.indexOf("text-danger") != -1) {
                 $(obj).parents("tr").children(".order-number").removeClass("text-danger");
@@ -100,10 +314,53 @@
                     $('#bodyOrderItems tr').remove();
                     $('#bodyOrderItems').html(result);
                 });
-            }            
+            }
+        }
+        function showFormEditItem(id, orderId, productSku, price) {
+            $("#formUpdateItem").removeClass("d-none");
+            $('#formUpdateItem div input[attr-name="id"]').val(id);
+            $('#formUpdateItem div input[attr-name="orderId"]').val(orderId);
+            $('#formUpdateItem div input[attr-name="productSku"]').val(productSku);
+            $('#formUpdateItem div input[attr-name="itemPrice"]').val(price);
+        }
+        function updateItem() {
+            var productSku = $('#formUpdateItem div input[attr-name="productSku"]').val().trim();
+            if (productSku === "") {
+                alert("Product Sku is a required field!");
+                return;
+            }
+            var orderItem = {
+                Id: $('#formUpdateItem div input[attr-name="id"]').val(),
+                OrderId: $('#formUpdateItem div input[attr-name="orderId"]').val(),
+                ProductSku: productSku,
+                itemPrice: $('#formUpdateItem div input[attr-name="itemPrice"]').val().replace(",","")
+            }
+            $.ajax({
+                url: 'api/Home/UpdateOrderItem',
+                type: 'POST',
+                cache: false,
+                data: { orderItem: orderItem}
+            }).done(function (result) {
+                if (result.success) {
+                    alert("Successfully!");
+                    sessionStorage.setItem('orderIdSaved', orderItem.Id);
+                    location.reload();
+                } else {
+                    alert(result.message);
+                }
+            });
         }
         $(function () {
-            
+            var orderNumberSaved = sessionStorage.getItem('orderNumberSaved');
+            if (orderNumberSaved !== '') {
+                sessionStorage.setItem('orderNumberSaved', '');
+                $('#orderTable tbody td[data-ordernumber="' + orderNumberSaved + '"]').click();
+            }
+            var orderIdSaved = sessionStorage.getItem('orderIdSaved');
+            if (orderIdSaved !== '') {
+                sessionStorage.setItem('orderIdSaved', '');
+                $('#orderTable tbody td[data-orderid="' + orderIdSaved + '"]').click();
+            }
         });
     </script>
 }

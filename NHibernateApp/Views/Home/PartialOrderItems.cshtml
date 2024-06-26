@@ -5,12 +5,12 @@
     {
         <tr>
             <td>
-                <input type="checkbox" name="name" value="" />
+                <input type="checkbox" class="checkItem" data-id="@item.Id" onclick="checkClickCheckboxItem('orderItemTable', false)" />
             </td>
             <td>@item.ProductSku</td>
-            <td>@item.ItemPrice</td>
+            <td>@string.Format("{0:#,##0.00}", item.ItemPrice)</td>
             <td>
-                <a href="#">Edit</a> | <a href="#">Delete</a>
+                <a href="#" onclick="showFormEditItem('@item.Id','@item.OrderId','@item.ProductSku','@string.Format("{0:#,##0.00}", item.ItemPrice)')">Edit</a>
             </td>
         </tr>
     }

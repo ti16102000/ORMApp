@@ -8,9 +8,9 @@ assembly="NHibernateApp" namespace="NHibernateApp.Models">
 		</id>
 		<property name="OrderNumber" not-null="true"/>
 
-		<!--<set name = "OrderItems" table = "TrainingOrderItem" cascade="all-delete-orphan">
+		<set name ="OrderItems" table ="TrainingOrderItem" inverse="true" cascade="all-delete-orphan">
 			<key column = "Order_ID_FK"/>
 			<one-to-many class = "OrderItem"/>
-		</set>-->	
+		</set>	
 	</class>
 </hibernate-mapping>

@@ -1,0 +1,19 @@
+﻿@model List<NHibernateApp.Models.OrderItem>
+
+@if(Model != null && Model.Any()){
+    foreach (var item in Model)
+    {
+        <div class="row mb-3 row-item">
+            <div class="form-group col-md-5">
+                <input type="text" class="form-control" attr-name="productSku" value="@item.ProductSku" placeholder="Product Sku">
+                <input type="text" attr-name="id" value="@item.Id" hidden>
+            </div>
+            <div class="form-group col-md-5">
+                <input type="text" class="form-control" attr-name="itemPrice" value="@string.Format("{0:#,##0.00}", item.ItemPrice)" onkeyup="setItemPrice(this)" placeholder="Price">
+            </div>
+            <div class="form-group col-md-2">
+                <button type="button" class="btn btn-danger" onclick="removeRowItem(this)">Remove</button>
+            </div>
+        </div>
+    }
+}

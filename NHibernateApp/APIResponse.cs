@@ -1,17 +1,17 @@
 ﻿namespace NHibernateApp
 {
-    public class ApiResponse<T>
+    public class ApiResponse
     {
         public bool Success { get; set; }
         public string Message { get; set; }
-        public T Data { get; set; }
+        public object Data { get; set; }
 
         public ApiResponse()
         {
             Success = true;
         }
 
-        public ApiResponse(T data)
+        public ApiResponse(object data)
         {
             Success = true;
             Data = data;

@@ -1,4 +1,5 @@
-﻿using NHibernate.Linq;
+﻿using NHibernate;
+using NHibernate.Linq;
 using NHibernate.Util;
 using NHibernateApp.Models;
 
@@ -14,16 +15,12 @@ namespace NHibernateApp.Repositories
                 if (existOrder) return false;
                 using (var transaction = session.BeginTransaction())
                 {
-                    await session.SaveAsync(order);
-
-                    //save order items
-                    if(order.OrderItems != null && order.OrderItems.Any())
+                    await session.SaveOrUpdateAsync(order);
+                    foreach (var item in order.OrderItems)
                     {
-                        order.OrderItems.ForEach(item => {
-                            item.OrderId = order.Id;
-                        });
-                        await session.SaveAsync(order.OrderItems);
-                    }                    
+                        item.Order = order;
+                        await session.SaveOrUpdateAsync(item);
+                    }
                     transaction.Commit();
                     return true;
                 }
@@ -36,17 +33,11 @@ namespace NHibernateApp.Repositories
             {
                 using (var transaction = session.BeginTransaction())
                 {
-                    //delete order
-                    var resultDelOrder = await session.CreateQuery("DELETE TrainingOrder o WHERE o.Id IN (:guidIds)")
-                                                        .SetParameterList("guidIds", guidIds)
-                                                        .ExecuteUpdateAsync();
-                    if (resultDelOrder < 1) return false;
-
-                    //delete order items by orderIds
-                    var resultDelOrderItems = await session.CreateQuery("DELETE TrainingOrderItem o WHERE o.Order_ID_FK IN (:guidIds)")
-                                                    .SetParameterList("guidIds", guidIds)
-                                                    .ExecuteUpdateAsync();
-                    if (resultDelOrderItems < 1) return false;
+                    var orders = await session.Query<Order>().Where(a => guidIds.Contains(a.Id)).ToListAsync();
+                    foreach (var item in orders)
+                    {
+                        await session.DeleteAsync(item);
+                    }
 
                     transaction.Commit();
                     return true;
@@ -60,12 +51,6 @@ namespace NHibernateApp.Repositories
             {
                 var order = await session.Query<Order>().FirstOrDefaultAsync(a => a.Id == id);
                 if (order == null) return null;
-
-                if (isLoadItems)
-                {
-                    var orderItems = await session.Query<OrderItem>().Where(a => a.OrderId == id).ToListAsync();
-                    order.OrderItems = orderItems;
-                }
                 return order;
             }
         }
@@ -79,7 +64,7 @@ namespace NHibernateApp.Repositories
         {
             using (var session = NHibernateSession.OpenSession())
             {
-                var orders = await session.Query<Order>().ToListAsync();
+               var orders = await session.Query<Order>().Fetch(o => o.OrderItems).ToListAsync();
                 return orders;
             }
         }
@@ -89,10 +74,10 @@ namespace NHibernateApp.Repositories
             using (var session = NHibernateSession.OpenSession())
             {
                 var existOrder = await session.Query<Order>().AnyAsync(a => a.Id == order.Id);
-                if (existOrder) return null;
+                if (!existOrder) return null;
                 using (var transaction = session.BeginTransaction())
                 {
-                    await session.UpdateAsync(order);
+                    await session.MergeAsync(order);
                     transaction.Commit();
                     return order;
                 }
