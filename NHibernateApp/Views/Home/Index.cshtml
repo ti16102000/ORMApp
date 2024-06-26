@@ -11,6 +11,7 @@
     <div class="row mt-3 mb-5">
         <form class="row d-none" id="form-order">
             <div class="col-md-6">
+<<<<<<< HEAD
                 <h4 id="title-form-order">Add Order</h4>
                 <div class="form-group mt-3">
                     <input type="text" class="form-control" id="orderNumber" placeholder="Enter order number">
@@ -20,6 +21,14 @@
                 <div class="form-group mt-3">
                     <button type="button" class="btn btn-secondary float-end" onclick="saveOrder()" id="btnSave">Create</button>
                     <button type="button" class="btn btn-danger float-end" onclick="cancel('#form-order')" id="btnSave" style="margin-right:20px;">Cancel</button>
+=======
+                <h4>Add Order</h4>
+                <div class="form-group mt-3">
+                    <input type="text" class="form-control" id="orderNumber" placeholder="Enter order number">
+                </div>
+                <div class="form-group mt-3">
+                    <button type="button" class="btn btn-secondary float-end" onclick="saveOrder()">Create</button>
+>>>>>>> 352e13628273688d2055f27dcde58f35594e200b
                 </div>
             </div>
             <div class="col-md-6">
@@ -36,6 +45,10 @@
                         <div class="form-group col-md-5">
                             <input type="text" class="form-control" attr-name="productSku" value="" placeholder="Product Sku">
                             <input type="text" attr-name="id" value="" hidden>
+<<<<<<< HEAD
+=======
+                            <input type="text" attr-name="orderId" value="" hidden>
+>>>>>>> 352e13628273688d2055f27dcde58f35594e200b
                         </div>
                         <div class="form-group col-md-5">
                             <input type="text" class="form-control" attr-name="itemPrice" onkeyup="setItemPrice(this)" placeholder="Price">
@@ -50,6 +63,19 @@
         </form>
     </div>
     <div class="row">
+<<<<<<< HEAD
+=======
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-primary" onclick="addNewOrder()">Create New Order</button>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-info float-end">Remove Orders/Items</button>
+                </div>
+            </div>
+        </div>
+>>>>>>> 352e13628273688d2055f27dcde58f35594e200b
         <div class="col-md-6">
             <div class="row">
                 <div class="col-md-6">
@@ -105,7 +131,11 @@
                             </td>
                             <td class="order-number" onclick="show_items(this,'@item.Id')" data-orderId="@item.Id" data-orderNumber="@item.OrderNumber">@item.OrderNumber (@item.OrderItems.Count())</td>
                             <td>
+<<<<<<< HEAD
                                 <a href="javascript:;" onclick="editOrder('@item.Id','@item.OrderNumber')">Edit</a> |
+=======
+                                <a href="#">Edit</a> | <a href="#">Delete</a> <br />
+>>>>>>> 352e13628273688d2055f27dcde58f35594e200b
                                 <a href="javascript:;" onclick="show_items(this,'@item.Id')">Show items</a>
 
                             </td>
@@ -136,6 +166,7 @@
 
 @section scripts {
     <script type="text/javascript">
+<<<<<<< HEAD
         var form = $("#form-order");
         var templateItem = $("#form-order #group-items").html().replace("d-none", "");
         clearGroupItemsForm();
@@ -154,6 +185,13 @@
             $('input[attr-name="orderId"]').val("");
             $("#orderNumber").val("");
             clearGroupItemsForm();
+=======
+        var templateItem = $("#form-order #group-items").html().replace("d-none", "");
+        $("#form-order #group-items").html("")
+
+        function addNewOrder() {
+            $("#form-order").removeClass("d-none");
+>>>>>>> 352e13628273688d2055f27dcde58f35594e200b
         }
         function addRowItem() {
             $("#form-order #group-items").append(templateItem);
@@ -169,6 +207,7 @@
                     .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             });
         }
+<<<<<<< HEAD
         function editOrder(orderId, orderNumber) {
             $(form).removeClass("d-none");
             $("#title-form-order").html("Update Order")
@@ -237,12 +276,15 @@
                 $("#" + table + " input[type='checkbox']").prop('checked', valueChecked);
             }
         }
+=======
+>>>>>>> 352e13628273688d2055f27dcde58f35594e200b
         function saveOrder(){
             var orderNumberVal = $("#orderNumber").val().trim();
             if (orderNumberVal === "") {
                 alert("Please enter order number! This is a required field.");
                 return;
             }
+<<<<<<< HEAD
             var isUpdate = $('input[attr-name="isUpdate"]').val();
             var orderId = $('input[attr-name="orderId"]').val();
             var items = [];
@@ -283,6 +325,17 @@
                 }
             });
         }        
+=======
+            var items = [];
+            if ($("#form-order #group-items>div").length > 0) {
+                $("#form-order #group-items>div").each(function () {
+                    var productId = $(this).attr('id');
+                    
+                    // items.push(clonedobj);
+                });
+            }
+        }
+>>>>>>> 352e13628273688d2055f27dcde58f35594e200b
         function search() {
             var value = $("#search-order").val();
             $("#orderTable .order-number").removeClass("text-danger")
@@ -315,6 +368,7 @@
                     $('#bodyOrderItems').html(result);
                 });
             }
+<<<<<<< HEAD
         }
         function showFormEditItem(id, orderId, productSku, price) {
             $("#formUpdateItem").removeClass("d-none");
@@ -361,6 +415,11 @@
                 sessionStorage.setItem('orderIdSaved', '');
                 $('#orderTable tbody td[data-orderid="' + orderIdSaved + '"]').click();
             }
+=======
+        }
+        $(function () {
+
+>>>>>>> 352e13628273688d2055f27dcde58f35594e200b
         });
     </script>
 }
